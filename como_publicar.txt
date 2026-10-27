@@ -1,0 +1,15 @@
+MUDAS BRASIL — SITE PRONTO PARA ABRIR NA NETLIFY
+
+PUBLICACAO PELO IPHONE
+1. Baixe o arquivo ZIP.
+2. Acesse https://app.netlify.com/drop no Safari e entre na sua conta.
+3. Selecione o arquivo Mudas_Brasil_SITE_ABRIR_NETLIFY.zip (o arquivo ZIP, nao o HTML isolado).
+4. Depois da publicacao, copie o endereço terminado em .netlify.app.
+5. Se a plataforma pedir uma pasta, descompacte o ZIP no app Arquivos e escolha a pasta que contem index.html e assets.
+
+IMPORTANTE
+- Este ZIP tem index.html NA RAIZ e uma pasta assets com todas as fotos.
+- 8 variedades, R$ 5 por muda. Frete GRATIS de 31 mudas em diante.
+- Orcamento pelo WhatsApp 62 99522-0619.
+- Pix FruitfyPay DESATIVADO ATE A INTEGRACAO SER VALIDADA E HABILITADA.
+- Para pagamento automatico, use o projeto com as funcoes de servidor e configure os dados da API somente nas variaveis privadas da Netlify. Nao publique tokens no HTML.
