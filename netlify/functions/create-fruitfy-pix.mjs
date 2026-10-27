@@ -15,6 +15,8 @@ const field=(o,k,max=120)=>typeof o?.[k]==='string'?o[k].trim().slice(0,max):'';
 const validCheckoutUrl=s=>{try{const u=new URL(s);return u.protocol==='https:'&&['fruitfy.io','fruitfypay.com'].some(x=>u.hostname===x||u.hostname.endsWith('.'+x))}catch{return false}};
 const pick=(o,keys)=>{for(const k of keys)if(typeof o?.[k]==='string'&&o[k].trim())return o[k].trim();return ''};
 export async function handler(event){
+// O navegador pode consultar a disponibilidade sem obter tokens nem dados pessoais.
+if(event.httpMethod==='GET')return reply(200,{enabled:process.env.FRUITFY_PIX_ENABLED==='true'&&Boolean(process.env.FRUITFY_API_TOKEN)&&Boolean(process.env.FRUITFY_STORE_ID)});
 if(event.httpMethod!=='POST')return reply(405,{error:'Método não permitido.'});
 if(process.env.FRUITFY_PIX_ENABLED!=='true'||!process.env.FRUITFY_API_TOKEN||!process.env.FRUITFY_STORE_ID)
  return reply(503,{error:'O Pix ainda não está habilitado. Solicite um orçamento pelo WhatsApp.'});
