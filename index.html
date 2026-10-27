@@ -185,7 +185,9 @@
     $('checkout').disabled=!count;
     $('copyOrder').disabled=!count;
     $('payOnline').disabled=!freeShipping||!CONFIG.pixEnabled;
-    $('onlinePayHelp').textContent=freeShipping?'Frete grátis liberado! Checkout FruitfyPay ainda em configuração. Use o WhatsApp para concluir seu pedido.':!count?'Adicione mudas para começar.':'Pix em configuração; você pode solicitar o orçamento pelo WhatsApp.';
+    $('payOnline').textContent=CONFIG.pixEnabled?'🔒 Pagar por Pix na FruitfyPay':'🔒 Pagamento Pix em configuração';
+    $('onlinePayHelp').textContent=CONFIG.pixEnabled?(freeShipping?'Pix disponível para este pedido. Confira seus dados antes de gerar a cobrança.':!count?'Adicione mudas para começar.':'Para pagar por Pix, adicione pelo menos 31 mudas; abaixo disso consulte o frete no WhatsApp.'):(freeShipping?'Frete grátis liberado! Pix ainda não ativado. Solicite seu pedido pelo WhatsApp.':!count?'Adicione mudas para começar.':'Pix ainda não ativado. Solicite o orçamento pelo WhatsApp.');
+    document.querySelector('.payment-choice').innerHTML='<strong>Escolha como deseja finalizar</strong> '+(CONFIG.pixEnabled?'Pague por Pix, ou solicite orçamento pelo WhatsApp antes de fechar seu pedido.':'O Pix da FruitfyPay está em configuração. Enquanto isso, solicite um orçamento pelo WhatsApp com seu carrinho.');
     $('cartItems').innerHTML=count?items.map(p=>`<div class="cart-item"><img src="assets/${p.image}" alt="${p.name}" /><div><h3>${p.name}</h3><small>${BRL(CONFIG.unitPrice)} por muda</small><div class="qty"><button type="button" data-step="-1" data-id="${p.id}" aria-label="Diminuir ${p.name}">−</button><span>${numberBR(p.qty)}</span><button type="button" data-step="1" data-id="${p.id}" aria-label="Aumentar ${p.name}">+</button></div><button type="button" class="remove" data-remove="${p.id}">Remover</button></div><span class="cart-item-price">${BRL(p.qty*CONFIG.unitPrice)}</span></div>`).join(''):'<div class="cart-empty"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.15"><path d="M3 3h2l2 12h11l3-9H6M9 20h.01M18 20h.01"/></svg><strong>Seu carrinho está vazio</strong><div>Escolha uma variedade e adicione as mudas para montar seu pedido.</div></div>';
   }
   function lockUI(active){document.body.classList.toggle('locked',active);$('overlay').classList.toggle('visible',active)}
@@ -256,7 +258,16 @@
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if($('paymentModal').classList.contains('open'))closePayment();else if($('productModal').classList.contains('open'))closeModal();else if($('cartDrawer').classList.contains('open'))closeCart()}});
   products.forEach(p=>{const opt=document.createElement('option');opt.value=p.id;opt.textContent=p.name;$('calcVariety').appendChild(opt)});$('calcSpacing').value='2x2';$('calcVariety').addEventListener('change',()=>{$('calcSpacing').value=['terra-maranhao'].includes($('calcVariety').value)?'3x3':['brs-princesa','maca-original','brs-terra-ana'].includes($('calcVariety').value)?'3x2':'2x2';calc()});$('calcArea').addEventListener('input',calc);$('calcSpacing').addEventListener('change',calc);$('addCalc').addEventListener('click',()=>{const qty=calc();if(qty>0){addToCart($('calcVariety').value,qty);openCart()}});
   $('menuButton').addEventListener('click',()=>{const expanded=$('mobileMenu').classList.toggle('open');$('menuButton').setAttribute('aria-expanded',String(expanded))});$('mobileMenu').addEventListener('click',e=>{if(e.target.closest('a')){$('mobileMenu').classList.remove('open');$('menuButton').setAttribute('aria-expanded','false')}});
-  $('year').textContent=new Date().getFullYear();renderProducts();renderCart();calc();
+  async function refreshPixAvailability(){
+    try{
+      const result=await fetch('/.netlify/functions/create-fruitfy-pix',{method:'GET',cache:'no-store'});
+      if(!result.ok)return;
+      const status=await result.json();
+      CONFIG.pixEnabled=status.enabled===true;
+      renderCart();
+    }catch(e){/* Sem resposta: Pix permanece desativado; WhatsApp continua disponível. */}
+  }
+  $('year').textContent=new Date().getFullYear();renderProducts();renderCart();calc();refreshPixAvailability();
   </script>
 </body>
 </html>

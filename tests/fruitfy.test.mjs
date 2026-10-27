@@ -30,3 +30,23 @@ test('rejeita produto inesperado e CPF inválido',()=>withEnv(async()=>{
 assert.equal((await handler(req([{id:'produto-falso',quantity:31}]))).statusCode,400);
 assert.equal((await handler(req([{id:'nanica',quantity:31}],{...buyer,cpf:'11111111111'}))).statusCode,400);
 }));
+
+test('status público mantém Pix desabilitado sem ativação e não revela token',async()=>{
+  const origToken=process.env.FRUITFY_API_TOKEN,origId=process.env.FRUITFY_STORE_ID,origFlag=process.env.FRUITFY_PIX_ENABLED;
+  try{
+    process.env.FRUITFY_API_TOKEN='token-secreto-teste';
+    process.env.FRUITFY_STORE_ID='uuid-loja';
+    process.env.FRUITFY_PIX_ENABLED='false';
+    let r=await handler({httpMethod:'GET'});
+    assert.equal(r.statusCode,200);
+    assert.deepEqual(JSON.parse(r.body),{enabled:false});
+    process.env.FRUITFY_PIX_ENABLED='true';
+    r=await handler({httpMethod:'GET'});
+    assert.deepEqual(JSON.parse(r.body),{enabled:true});
+    assert.equal(r.body.includes('token-secreto-teste'),false);
+  }finally{
+    for(const [key,val] of [['FRUITFY_API_TOKEN',origToken],['FRUITFY_STORE_ID',origId],['FRUITFY_PIX_ENABLED',origFlag]]){
+      if(val===undefined)delete process.env[key];else process.env[key]=val;
+    }
+  }
+});
